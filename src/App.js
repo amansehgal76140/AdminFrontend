@@ -1,24 +1,36 @@
-import logo from './logo.svg';
-import './App.css';
+import { Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
+import ProtectedRoute from "./components/common/ProtectedRoute";
+import Dashboard from "./pages/Dashboard";
+import FillQuoteDetails from "./pages/FillQuoteDetails";
+import FillQuote from "./pages/FillQuote";
+import QuoteSubmitted from "./pages/QuoteSubmitted";
+import ViewOrder from "./pages/OrdersArchive/ViewOrder";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routes>
+      <Route path="*" element={<div>Page Not Found!!</div>} />
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/elgc/submit-your-quote/:projectId"
+        element={<FillQuoteDetails />}
+      />
+      <Route
+        path="/elgc/submit-details/:projectId/:id"
+        element={<FillQuote />}
+      />
+      <Route path="/elgc/thanksPage" element={<QuoteSubmitted />} />
+      <Route path="/elgc/vieworder/:orderId/:id" element={<ViewOrder />} />
+    </Routes>
   );
 }
 
