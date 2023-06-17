@@ -10,7 +10,7 @@ import ViewOrder from "./pages/OrdersArchive/ViewOrder";
 function App() {
   return (
     <Routes>
-      <Route path="*" element={<div>Page Not Found!!</div>} />
+      <Route path="*" element={<Login />} />
       <Route path="/login" element={<Login />} />
       <Route
         path="/admin/*"

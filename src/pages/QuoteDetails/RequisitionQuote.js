@@ -43,7 +43,7 @@ function RequisitionQuote() {
         let value = 0;
         details.forEach((detail, index) => {
           value += detail.unitPrice * detail.quantity;
-          if (index % items == items - 1) {
+          if (index % items === items - 1) {
             temp1.push(value);
             value = 0;
           }
@@ -51,7 +51,7 @@ function RequisitionQuote() {
         console.log(temp1);
         setTotalPrice(temp1);
         for (let i = 1; i <= 2 * totalCompanies; i++) {
-          if (i % 2 != 0)
+          if (i % 2 !== 0)
             temp.push(
               <TableCell key={i} align="left" sx={{ fontWeight: "bold" }}>
                 Unit Price
