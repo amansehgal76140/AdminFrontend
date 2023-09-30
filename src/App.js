@@ -1,10 +1,10 @@
 import { Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
+import Login from "./pages/Auth/Login";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
-import FillQuoteDetails from "./pages/FillQuoteDetails";
-import FillQuote from "./pages/FillQuote";
-import QuoteSubmitted from "./pages/QuoteSubmitted";
+import FillQuoteDetails from "./pages/SupplierQuote/FillQuoteDetails";
+import FillQuote from "./pages/SupplierQuote/FillQuote";
+import QuoteSubmitted from "./pages/SupplierQuote/QuoteSubmitted";
 import ViewOrder from "./pages/OrdersArchive/ViewOrder";
 
 function App() {

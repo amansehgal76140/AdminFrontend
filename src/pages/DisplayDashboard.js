@@ -1,11 +1,57 @@
 import React, { useEffect, useState } from "react";
 import MyEditor from "../components/MyEditor";
-import { Box, Paper, Alert, Typography, Button } from "@mui/material";
-import { baseUrl, quoteLink } from "../constant";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import { baseUrl, supplierApiUrl, quoteLink } from "../constant";
 import axios from "axios";
 import AutoFillTextField from "../components/common/AutoFillTextField";
 import UserTextField from "../components/common/UserTextField";
 import { useNavigate, useParams } from "react-router-dom";
+
+const generateTableHtml = (materials, projectId) => {
+  let tableHtml = `
+    <p>Dear Sir,</p>
+    <p>Please Quote Your Price for the following</p>
+    <table style="border: 1px solid;">
+      <thead>
+        <tr>
+          <th align="left">S. No.</th>
+          <th align="left">Description</th>
+          <th align="left">Size</th>
+          <th align="left">Quantity</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  for (let i = 0; i < materials.length; i++) {
+    tableHtml += `
+      <tr style="border: 0;">
+        <td align="left">${i + 1}</td>  
+        <td align="left">${materials[i].description}</td>
+        <td align="left">${materials[i].size}</td>
+        <td align="left">${materials[i].quantity}</td>
+      </tr>
+    `;
+  }
+
+  tableHtml += `
+      </tbody>
+    </table>
+    <a href=${quoteLink + "/" + projectId}>Submit your Quotation</a>
+    <p><span style="font-weight: bold;">Thanks and Regards</span></p>
+    <p><span style="font-weight: bold;">K R Muraly</span></p>
+    <h1>Emirates Link General Contracting LLC</h1>
+    <p>Tel : + 971 2 6727226</p>
+    <p>P.O. Box – 32799 Abu Dhabi | United Arab Emirates</p>
+    <p>Email : <a href="mailto:admin@elgc.ae">admin@elgc.ae</a> | <a href="http://www.elgc.ae" target="_blank">www.elgc.ae</a></p>
+  `;
+
+  return tableHtml;
+};
 
 const DisplayDashboard = () => {
   const [contentData, setContentData] = useState("");
@@ -18,65 +64,23 @@ const DisplayDashboard = () => {
   const navigate = useNavigate();
   const params = useParams();
 
-  const generateTableHtml = (materials) => {
-    let tableHtml = `
-      <p>Dear Sir,</p>
-      <p>Please Quote Your Price for the following</p>
-      <table style="border: 1px solid;">
-        <thead>
-          <tr>
-            <th align="left">S. No.</th>
-            <th align="left">Description</th>
-            <th align="left">Size</th>
-            <th align="left">Quantity</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-
-    for (let i = 0; i < materials.length; i++) {
-      tableHtml += `
-        <tr style="border: 0;">
-          <td align="left">${i + 1}</td>  
-          <td align="left">${materials[i].description}</td>
-          <td align="left">${materials[i].size}</td>
-          <td align="left">${materials[i].quantity}</td>
-        </tr>
-      `;
-    }
-
-    tableHtml += `
-        </tbody>
-      </table>
-      <a href=${quoteLink + "/" + params.projectId}>Submit your Quotation</a>
-      <p><span style="font-weight: bold;">Thanks and Regards</span></p>
-      <p><span style="font-weight: bold;">K R Muraly</span></p>
-      <h1>Emirates Link General Contracting LLC</h1>
-		  <p>Tel : + 971 2 6727226</p>
-		  <p>P.O. Box – 32799 Abu Dhabi | United Arab Emirates</p>
-		  <p>Email : <a href="mailto:admin@elgc.ae">admin@elgc.ae</a> | <a href="http://www.elgc.ae" target="_blank">www.elgc.ae</a></p>
-    `;
-
-    return tableHtml;
-  };
-
   useEffect(() => {
     const projectId = params.projectId;
     axios
       .get(`${baseUrl}/getRequisitions/${projectId}`)
       .then((res) => {
-        console.log(res.data.materials);
-        const tableHtmlString = generateTableHtml(res.data.materials);
+        const tableHtmlString = generateTableHtml(
+          res.data.materials,
+          params.projectId
+        );
         setContentData(tableHtmlString);
-        console.log(tableHtmlString);
         setIsLoading(true);
       })
       .catch((err) => {
-        console.log(err);
         setErrorMessage("Problem in Fetching Materials");
       });
     axios
-      .get(`${baseUrl}/getSupplierEmails`)
+      .get(`${supplierApiUrl}/getSupplierEmails`)
       .then((res) => {
         setEmails(res.data.emails);
         console.log(res.data.emails);
@@ -99,7 +103,6 @@ const DisplayDashboard = () => {
         mailBody: contentData,
       })
       .then((res) => {
-        console.log(res.data);
         navigate(`/admin/pendingrequisition`);
       })
       .catch((err) => {

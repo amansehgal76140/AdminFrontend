@@ -1,17 +1,16 @@
 import { Routes, Route } from "react-router-dom";
-import ViewSupplier from "../pages/ViewSupplier";
+import ViewSupplier from "./Supplier/ViewSupplier";
 import SideBar from "../components/SideBar";
 import DisplayDashboard from "./DisplayDashboard";
-import { Box } from "@mui/material";
-import AddSupplier from "./AddSupplier";
+import Box from "@mui/material/Box";
+import AddSupplier from "./Supplier/AddSupplier";
 import NewRequisition from "./NewRequisition";
 import PendingRequisition from "./PendingRequisition";
 import ApprovedRequisition from "./ApprovedRequisition";
 import SupplierQuote from "../pages/QuoteDetails/SupplierQuote";
 import RequisitionQuote from "./QuoteDetails/RequisitionQuote";
 import OrderDetails from "./OrdersArchive/OrderDetails";
-
-const projectId = "20235810413435_";
+import UpdateQuote from "./QuoteDetails/UpdateQuote";
 
 const Dashboard = () => {
   return (
@@ -32,6 +31,7 @@ const Dashboard = () => {
           path="/viewcomparestatement/:projectId"
           element={<RequisitionQuote />}
         />
+        <Route path="/updatesupplierquote/:id" element={<UpdateQuote />} />
         <Route
           path="/approvedrequisition"
           element={<ApprovedRequisition status={["Approved"]} />}

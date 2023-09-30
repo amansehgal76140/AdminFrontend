@@ -183,16 +183,19 @@ function Receipt({ previewOrder, setActiveTab }) {
                 </TableFooter>
               </Table>
             </TableContainer>
-            <Box my={2}>
-              <Box display={"flex"}>
-                <Typography>Approved By:-</Typography>
-                <img src={ApprovedImage} alt="sign" />
+            <Box my={5} display={"flex"} width={"100%"}>
+              <Box>
+                <Typography>
+                  <span>Approved By:-</span>
+                  <img src={ApprovedImage} alt="sign" />
+                </Typography>
               </Box>
-            </Box>
-            <Box my={2}>
-              <Box display={"flex"}>
-                <Typography>Ordered By:-</Typography>
-                <img src={OrderedImage} alt="sign" />
+
+              <Box ml={"auto"}>
+                <Typography>
+                  <span>Ordered By:-</span>
+                  <img src={OrderedImage} alt="sign" />
+                </Typography>
               </Box>
             </Box>
           </Box>

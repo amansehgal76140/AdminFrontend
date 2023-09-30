@@ -8,10 +8,10 @@ import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import UserTextField from "../components/common/UserTextField";
+import UserTextField from "../../components/common/UserTextField";
 import axios from "axios";
 import Alert from "@mui/material/Alert";
-import { baseUrl } from "../constant";
+import { baseUrl } from "../../constant";
 import { useNavigate } from "react-router-dom";
 
 const theme = createTheme();

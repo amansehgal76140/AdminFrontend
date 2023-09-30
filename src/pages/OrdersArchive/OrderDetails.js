@@ -1,5 +1,9 @@
-import { Alert, Typography, Box, IconButton, Tooltip } from "@mui/material";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import axios from "axios";
+import Alert from "@mui/material/Alert";
 import React, { useEffect, useState } from "react";
 import { baseUrl } from "../../constant";
 import Table from "@mui/material/Table";

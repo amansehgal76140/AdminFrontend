@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Box } from "@mui/material";
-import { baseUrl } from "../constant";
+import { Box, Tooltip } from "@mui/material";
+import { supplierApiUrl } from "../../constant";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -17,6 +17,49 @@ import Alert from "@mui/material/Alert";
 import { Navigate, useLocation } from "react-router-dom";
 
 const drawerWidth = 260;
+
+const filterDataOnId = (temp) => {
+  const suppliersRecords = [];
+  temp.map((element, index) => {
+    const {
+      name,
+      email,
+      company_name,
+      country_name,
+      address,
+      phone,
+      supplierId,
+      fileName,
+    } = element;
+    const actualFileName = fileName.substring(
+      fileName.indexOf("_") + 1,
+      fileName.length
+    );
+    if (
+      index === 0 ||
+      supplierId !== suppliersRecords[suppliersRecords.length - 1].supplierId
+    ) {
+      console.log("Hello");
+      const tempName = [actualFileName];
+      suppliersRecords.push({
+        name,
+        email,
+        phone,
+        company_name,
+        country_name,
+        address,
+        supplierId,
+        file_Names: tempName,
+      });
+    } else {
+      suppliersRecords[suppliersRecords.length - 1].file_Names.push(
+        actualFileName
+      );
+    }
+  });
+  return suppliersRecords;
+};
+
 const ViewSupplier = () => {
   const [supplierData, setSupplierData] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
@@ -35,10 +78,10 @@ const ViewSupplier = () => {
     console.log(supplierDetails);
     const requestBody = {
       supplierId: supplierDetails.supplierId,
-      fileName: supplierDetails.company_detail,
+      fileName: supplierDetails.file_Names,
     };
     axios
-      .post(`${baseUrl}/deleteSupplierDetails`, requestBody)
+      .post(`${supplierApiUrl}/deleteSupplierDetails`, requestBody)
       .then((res) => {
         const temp = [...supplierData];
         const newSupplierData = temp.filter(
@@ -55,9 +98,9 @@ const ViewSupplier = () => {
   };
 
   const downloadFile = async (company_detail) => {
-    console.log("downloadfile");
+    console.log(company_detail);
     const response = await axios.get(
-      `${baseUrl}/getSupplierCompanyFile/${company_detail}`,
+      `${supplierApiUrl}/getSupplierCompanyFile/${company_detail}`,
       {
         responseType: "blob", // specify the response type as blob
       }
@@ -77,10 +120,12 @@ const ViewSupplier = () => {
   useEffect(() => {
     console.log("getSuppliersDetails");
     axios
-      .get(`${baseUrl}/getSupplierDetails`)
+      .get(`${supplierApiUrl}/getSupplierDetails`)
       .then((res) => {
-        console.log(res.data);
-        setSupplierData(res.data.suppliers);
+        const temp = res.data.suppliers;
+        console.log(temp);
+        const suppliersRecords = filterDataOnId(temp);
+        setSupplierData(suppliersRecords);
       })
       .catch((err) => {
         console.log(err);
@@ -155,14 +200,22 @@ const ViewSupplier = () => {
                   </TableCell>
                   <TableCell align="left">{supplierDetails.address}</TableCell>
                   <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={() =>
-                        downloadFile(supplierDetails.company_detail)
-                      }
-                    >
-                      <DownloadIcon />
-                    </IconButton>
+                    {supplierDetails.file_Names.map((path, index) => {
+                      return (
+                        <Tooltip title={path} placement="top" key={path}>
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              downloadFile(
+                                supplierDetails.supplierId + index + "_" + path
+                              )
+                            }
+                          >
+                            <DownloadIcon />
+                          </IconButton>
+                        </Tooltip>
+                      );
+                    })}
                   </TableCell>
                   <TableCell align="left">
                     <Box>

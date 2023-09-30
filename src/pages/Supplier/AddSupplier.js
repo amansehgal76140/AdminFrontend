@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
-import UserTextField from "../components/common/UserTextField";
-import { Grid, Box, Typography, Button, Paper } from "@mui/material";
-import { baseUrl } from "../constant";
+import UserTextField from "../../components/common/UserTextField";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
+import { supplierApiUrl } from "../../constant";
 import Alert from "@mui/material/Alert";
 import axios from "axios";
 import { useParams } from "react-router-dom";
@@ -14,17 +18,28 @@ const temp = {
   company: "",
   address: "",
   mobile: "",
-  file: null,
+  file: [null],
 };
 
 function AddSupplier() {
   const [supplierData, setSupplierData] = useState(temp);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [infoMeassage, setInfoMessage] = useState("");
   const [mode, setMode] = useState("add");
   const params = useParams();
   let location = useLocation();
+
+  const addFiles = () => {
+    const temp = { ...supplierData };
+    temp.file.push(null);
+    setSupplierData(temp);
+  };
+
+  const removeFile = () => {
+    const temp = { ...supplierData };
+    temp.file.pop();
+    setSupplierData(temp);
+  };
 
   const handleChange = (label, value, heading) => {
     const temp = { ...supplierData };
@@ -32,37 +47,27 @@ function AddSupplier() {
     setSupplierData(temp);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e, index) => {
     console.log(e.target.files[0]);
     if (e.target.files[0].name.endsWith(".pdf"))
       if (e.target.files) {
         const temp = { ...supplierData };
-        temp["file"] = e.target.files[0];
-        console.log(supplierData);
-        console.log(temp);
+        temp["file"][index] = e.target.files[0];
+        console.debug(supplierData);
+        console.debug(temp);
         setSupplierData(temp);
       }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     const { name, email, company, country, address, mobile, file } =
       supplierData;
-
-    if (
-      !name ||
-      !email ||
-      !company ||
-      !address ||
-      !country ||
-      !mobile ||
-      !file
-    ) {
-      setInfoMessage("Please fill Out All Fields");
-      return;
-    }
-
+    console.log(file);
     let formData = new FormData();
-    formData.append("company_details", supplierData.file);
+    file.forEach((currFile) => {
+      formData.append("company_details", currFile);
+    });
     formData.append("name", name);
     formData.append("email", email);
     formData.append("address", address);
@@ -72,25 +77,25 @@ function AddSupplier() {
 
     axios({
       method: "post",
-      url: `${baseUrl}/addNewSupplier`,
+      url: `${supplierApiUrl}/addNewSupplier`,
       data: formData,
       headers: { "Content-Type": "multipart/form-data" },
     })
       .then((res) => {
         setErrorMessage("");
-        setInfoMessage("");
         setSupplierData(temp);
         setSuccessMessage("Supplier Added Successfully");
+        setMode("redirect");
       })
       .catch((err) => {
         console.log(err);
         setSuccessMessage("");
-        setInfoMessage("");
         setErrorMessage("Problem in adding Data");
       });
   };
 
-  const updateSupplier = () => {
+  const updateSupplier = (e) => {
+    e.preventDefault();
     const body = {
       name: supplierData.name,
       email: supplierData.email,
@@ -101,7 +106,7 @@ function AddSupplier() {
       supplierId: params.supplierId,
     };
     axios
-      .post(`${baseUrl}/updateSupplierDetails`, body)
+      .post(`${supplierApiUrl}/updateSupplierDetails`, body)
       .then((res) => {
         setSuccessMessage("Supplier Edited Successfully");
         setMode("redirect");
@@ -114,7 +119,7 @@ function AddSupplier() {
   useEffect(() => {
     if (params.supplierId) {
       axios
-        .get(`${baseUrl}/getSupplier/${params.supplierId}`)
+        .get(`${supplierApiUrl}/getSupplier/${params.supplierId}`)
         .then((res) => {
           setMode("edit");
           const temp = res.data.results[0];
@@ -153,9 +158,7 @@ function AddSupplier() {
               {mode === "edit" ? "Edit Supplier" : "Add New Supplier"}
             </Typography>
           </Box>
-          {successMessage.length > 0 ||
-          errorMessage.length > 0 ||
-          infoMeassage.length > 0 ? (
+          {successMessage.length > 0 || errorMessage.length > 0 ? (
             <Box marginY={2} marginX={3}>
               {errorMessage.length > 0 && (
                 <Alert
@@ -177,21 +180,15 @@ function AddSupplier() {
                   {successMessage}
                 </Alert>
               )}
-              {infoMeassage.length > 0 && (
-                <Alert
-                  severity="info"
-                  onClose={() => {
-                    setInfoMessage("");
-                  }}
-                >
-                  {infoMeassage}
-                </Alert>
-              )}
             </Box>
           ) : (
             <></>
           )}
-          <Box marginLeft={3} noValidate component="form">
+          <Box
+            marginLeft={3}
+            component="form"
+            onSubmit={mode === "add" ? handleSubmit : updateSupplier}
+          >
             <Grid container spacing={5} rowSpacing={4}>
               <Grid item xs={12} md={6}>
                 <UserTextField
@@ -252,18 +249,22 @@ function AddSupplier() {
                   width={"90%"}
                 />
               </Grid>
-              {mode === "add" && (
-                <Grid item xs={12}>
-                  <UserTextField
-                    label="Upload Company Details File*"
-                    heading="file"
-                    handleChange={handleFileChange}
-                    value={supplierData.file}
-                    type="file"
-                    width={"95%"}
-                  />
-                </Grid>
-              )}
+              {mode === "add" &&
+                supplierData.file.map((fileDetails, index) => {
+                  return (
+                    <Grid item xs={12} key={index}>
+                      <UserTextField
+                        label="Upload Company Details File*"
+                        heading="file"
+                        handleChange={handleFileChange}
+                        value={fileDetails}
+                        type="file"
+                        index={index}
+                        width={"95%"}
+                      />
+                    </Grid>
+                  );
+                })}
             </Grid>
             <Box
               display={"flex"}
@@ -272,19 +273,35 @@ function AddSupplier() {
               justifyContent={"center"}
             >
               {mode === "add" ? (
-                <Button
-                  variant="contained"
-                  size="medium"
-                  onClick={handleSubmit}
-                >
-                  Add Supplier
-                </Button>
+                <>
+                  <Box mr={2}>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={addFiles}
+                      disabled={supplierData.file.length === 3}
+                    >
+                      Add Files
+                    </Button>
+                  </Box>
+
+                  <Box mr={2}>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      disabled={supplierData.file.length === 1}
+                      onClick={removeFile}
+                    >
+                      Remove File
+                    </Button>
+                  </Box>
+
+                  <Button variant="contained" size="small" type="submit">
+                    Add Supplier
+                  </Button>
+                </>
               ) : (
-                <Button
-                  variant="contained"
-                  size="medium"
-                  onClick={updateSupplier}
-                >
+                <Button variant="contained" size="small" type="submit">
                   Update Supplier
                 </Button>
               )}

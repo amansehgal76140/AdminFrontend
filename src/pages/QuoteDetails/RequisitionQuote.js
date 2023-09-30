@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import ELGCImage from "../../image/ELGC-Logo-removebg-preview-1.png";
-import { Box, Paper, Typography, Alert } from "@mui/material";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import Alert from "@mui/material/Alert";
 import { useParams } from "react-router-dom";
 import { baseUrl } from "../../constant";
 import axios from "axios";
@@ -14,6 +17,7 @@ import TableFooter from "@mui/material/TableFooter";
 import Button from "@mui/material/Button";
 import CreateOrder from "./CreateOrder";
 import GeneralManagerIamge from "../../image/Signatire2.png";
+import { useNavigate } from "react-router-dom";
 
 function RequisitionQuote() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -25,14 +29,16 @@ function RequisitionQuote() {
   const [id, setId] = useState(-1);
   const [activeTab, setActiveTab] = useState(0);
   const Params = useParams();
+  const navigate = useNavigate();
   const { projectId } = Params;
 
   useEffect(() => {
+    console.log("quote details changed");
     axios
       .get(`${baseUrl}/getQuotationItems/${projectId}`)
       .then((res) => {
         const { details } = res.data;
-        console.log(details[0].id - details[details.length - 1].id + 1);
+        console.log(details);
         setQuoteDetails(details);
         const totalCompanies =
           details[0].id - details[details.length - 1].id + 1;
@@ -48,7 +54,6 @@ function RequisitionQuote() {
             value = 0;
           }
         });
-        console.log(temp1);
         setTotalPrice(temp1);
         for (let i = 1; i <= 2 * totalCompanies; i++) {
           if (i % 2 !== 0)
@@ -89,13 +94,18 @@ function RequisitionQuote() {
     console.log(id);
   };
 
+  const updateQuote = (companyNumber) => {
+    const id = quoteDetails[companyNumber * totalItems].id;
+    navigate(`/admin/updatesupplierquote/${id}`, { replace: false });
+  };
+
   if (quoteDetails.length === 0) return <div>Loading....</div>;
 
   if (activeTab === 1)
     return (
       <CreateOrder
         id={id}
-        quoteDetails={quoteDetails}
+        quoteDetails={JSON.parse(JSON.stringify(quoteDetails))}
         setActiveTab={setActiveTab}
       />
     );
@@ -147,7 +157,11 @@ function RequisitionQuote() {
                     {companyHeading}
                   </TableRow>
                   <TableRow>
-                    <TableCell align="left" sx={{ fontWeight: "bold" }}>
+                    <TableCell
+                      align="left"
+                      style={{ whiteSpace: "nowrap" }}
+                      sx={{ fontWeight: "bold" }}
+                    >
                       SR No
                     </TableCell>
                     <TableCell align="left" sx={{ fontWeight: "bold" }}>
@@ -167,18 +181,44 @@ function RequisitionQuote() {
                   {quoteDetails.slice(0, totalItems).map((item, index) => {
                     return (
                       <TableRow key={index}>
-                        <TableCell align="left">{index + 1}</TableCell>
-                        <TableCell align="left">{item.description}</TableCell>
-                        <TableCell align="left">{item.size}</TableCell>
-                        <TableCell align="left">{item.quantity}</TableCell>
+                        <TableCell
+                          align="left"
+                          style={{ whiteSpace: "nowrap" }}
+                        >
+                          {index + 1}
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          style={{ whiteSpace: "nowrap" }}
+                        >
+                          {item.description}
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          style={{ whiteSpace: "nowrap" }}
+                        >
+                          {item.size}
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          style={{ whiteSpace: "nowrap" }}
+                        >
+                          {item.quantity}
+                        </TableCell>
                         {quoteDetails.map((quote) => {
                           if (quote.itemId === item.itemId) {
                             return (
                               <>
-                                <TableCell align="left">
+                                <TableCell
+                                  align="left"
+                                  style={{ whiteSpace: "nowrap" }}
+                                >
                                   {quote.unitPrice}
                                 </TableCell>
-                                <TableCell align="left">
+                                <TableCell
+                                  align="left"
+                                  style={{ whiteSpace: "nowrap" }}
+                                >
                                   {quote.unitPrice * quote.quantity}
                                 </TableCell>
                               </>
@@ -216,9 +256,13 @@ function RequisitionQuote() {
                           colSpan={2}
                           key={index}
                           sx={{ fontWeight: "bold", fontSize: "16px" }}
+                          style={{ whiteSpace: "nowrap" }}
                         >
+                          <Button onClick={() => updateQuote(index)}>
+                            Update
+                          </Button>
                           <Button onClick={() => createOrder(index)}>
-                            Create Order
+                            Order
                           </Button>
                         </TableCell>
                       );

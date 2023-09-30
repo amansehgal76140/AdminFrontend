@@ -21,16 +21,17 @@ function CreateOrder({ id, quoteDetails, setActiveTab }) {
   };
 
   useEffect(() => {
+    console.log(quoteDetails);
     axios
       .get(`${baseUrl}/getCompanyDetails/${id}`)
       .then((res) => {
         console.log(res.data.details);
         setCompanyDetails(res.data.details);
-        setItemDetails(
-          quoteDetails.filter((quote) => {
-            if (quote.id === id) return quote;
-          })
-        );
+
+        const itemDetailsCopy = quoteDetails.filter((quote) => {
+          if (quote.id === id) return { ...quote };
+        });
+        setItemDetails(itemDetailsCopy);
       })
       .catch((err) => {
         setErrorMessage("Error in Fetching Details");

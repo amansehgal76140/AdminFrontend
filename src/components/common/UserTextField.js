@@ -40,7 +40,7 @@ export default function UserTextField(props) {
           type="file"
           inputProps={{ accept: ".pdf" }}
           onChange={(event) => {
-            props.handleChange(event);
+            props.handleChange(event, index);
           }}
           width={width}
         />
